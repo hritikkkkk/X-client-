@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { CiCircleMore } from "react-icons/ci";
 import { FaHashtag, FaXTwitter } from "react-icons/fa6";
 import { GoHomeFill } from "react-icons/go";
@@ -7,7 +7,10 @@ import { MdOutlineLocalPostOffice } from "react-icons/md";
 import { PiBell, PiBookmarkSimple } from "react-icons/pi";
 import { BsPeople } from "react-icons/bs";
 import FeedCard from "@/components/feedcards";
-
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
+import { graphqlClient } from "@/client/api";
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 
 interface TwitterSideBarButton {
   title: string;
@@ -50,6 +53,24 @@ const sidebarMenuItems: TwitterSideBarButton[] = [
 ];
 
 export default function Home() {
+  const handleLoginWithGoogle = useCallback(
+    async (cred: CredentialResponse) => {
+      const googleToken = cred.credential;
+      if (!googleToken) return toast.error(`Google token not found`);
+
+      const { verifyGoogleToken } = await graphqlClient.request(
+        verifyUserGoogleTokenQuery,
+        { token: googleToken }
+      );
+
+      toast.success("verified success");
+      console.log(verifyGoogleToken);
+
+      if (verifyGoogleToken)
+        window.localStorage.setItem("twitter_token", verifyGoogleToken);
+    },
+    []
+  );
   return (
     <div>
       <div className="grid grid-cols-10 h-screen w-screen px-16">
@@ -93,7 +114,21 @@ export default function Home() {
           <FeedCard />
           <FeedCard />
         </div>
-        <div className="col-span-3"></div>
+        <div className="col-span-3 p-5">
+          <div className="border-gray-700 border rounded-lg p-3">
+            <h1 className=" text-xl font-bold  ">New to X?</h1>
+            <p className="text-xs w-full mb-3 mt-2  text-gray-500">
+              Sign in now to get your own personalized timeline!
+            </p>
+
+            <GoogleLogin onSuccess={handleLoginWithGoogle} />
+
+            <p className="text-xs w-full mt-4  text-gray-500">
+              By signing up, you agree to the Terms of service and Privacy
+              Policy,including Cookie use.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

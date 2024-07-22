@@ -14,11 +14,13 @@ const FeedCard = () => {
         <div className="col-span-1">👤</div>
         <div className="col-span-11">
           <h5>Hritik Shaw</h5>
-          <p>
-            this is my first tweet this is my first tweet this is my first
-            tweetthis is my first tweetthis is my first tweet this is my first
-            tweetthis is my first this is my first tweet this is my first tweet
-            this is my first tweetthis is my first tweet
+          <p className="text-sm font-light">
+            Just updated the tweet functionality! Now with Cloudinary image
+            handling and robust hashtag management:
+            - Efficient tweet & imageupdates
+            - Cloudinary API for image management
+            - Smart hashtag parsing & updating
+            #Cloudinary
           </p>
 
           <div className="flex justify-between mt-5 text-lg  p-2 w-[100%]">
