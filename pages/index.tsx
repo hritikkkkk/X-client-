@@ -9,8 +9,11 @@ import { BsPeople } from "react-icons/bs";
 import FeedCard from "@/components/feedcards";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import { graphqlClient } from "@/client/api";
 import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/hooks/user";
 
 interface TwitterSideBarButton {
   title: string;
@@ -39,10 +42,6 @@ const sidebarMenuItems: TwitterSideBarButton[] = [
     icon: <PiBookmarkSimple />,
   },
   {
-    title: "Communities",
-    icon: <BsPeople />,
-  },
-  {
     title: "Profile",
     icon: <IoPersonOutline />,
   },
@@ -53,6 +52,9 @@ const sidebarMenuItems: TwitterSideBarButton[] = [
 ];
 
 export default function Home() {
+  const { user } = useCurrentUser();
+  const queryClient = useQueryClient();
+
   const handleLoginWithGoogle = useCallback(
     async (cred: CredentialResponse) => {
       const googleToken = cred.credential;
@@ -68,13 +70,14 @@ export default function Home() {
 
       if (verifyGoogleToken)
         window.localStorage.setItem("twitter_token", verifyGoogleToken);
+
+      await queryClient.invalidateQueries({queryKey: ['current-user']});
     },
-    []
+    [queryClient]
   );
   return (
-    <div>
       <div className="grid grid-cols-10 h-screen w-screen px-16">
-        <div className="col-span-2 pt-2">
+        <div className="col-span-2 pt-2 relative">
           <div className="text-3xl h-fit hover:bg-gray-900 rounded-full p-1 items-center w-fit cursor-pointer transition-all">
             <FaXTwitter />
           </div>
@@ -96,6 +99,27 @@ export default function Home() {
               </button>
             </div>
           </div>
+          {user && (
+            <div className="absolute bottom-5 flex gap-2 items-center px-3 py-2 rounded-full">
+              {user && user.profileImageURL && (
+             <Image
+             className="rounded-full"
+             src={user?.profileImageURL}
+             alt="user-image"
+             height={40}
+             width={40}
+           />
+              )}
+              <div>
+                <h3 className="text-sm font-bold">
+                  {user.firstName} {user.lastName}
+                </h3>
+                <h3 className="text-xs text-gray-500">
+                  {user.email}
+                </h3>
+              </div>
+            </div>
+          )}
         </div>
         <div className="col-span-5 border-r-[0.01px] border-l-[0.01px] h-screen overflow-y-scroll no-scrollbar  border-gray-700">
           <FeedCard />
@@ -115,21 +139,23 @@ export default function Home() {
           <FeedCard />
         </div>
         <div className="col-span-3 p-5">
-          <div className="border-gray-700 border rounded-lg p-3">
-            <h1 className=" text-xl font-bold  ">New to X?</h1>
-            <p className="text-xs w-full mb-3 mt-2  text-gray-500">
-              Sign in now to get your own personalized timeline!
-            </p>
+          {!user && (
+            <div className="border-gray-700 border rounded-lg p-3">
+              <h1 className=" text-xl font-bold  ">New to X?</h1>
+              <p className="text-xs w-full mb-3 mt-2  text-gray-500">
+                Sign in now to get your own personalized timeline!
+              </p>
 
-            <GoogleLogin onSuccess={handleLoginWithGoogle} />
+              <GoogleLogin onSuccess={handleLoginWithGoogle} />
 
-            <p className="text-xs w-full mt-4  text-gray-500">
-              By signing up, you agree to the Terms of service and Privacy
-              Policy,including Cookie use.
-            </p>
-          </div>
+              <p className="text-xs w-full mt-4  text-gray-500">
+                By signing up, you agree to the Terms of service and Privacy
+                Policy,including Cookie use.
+              </p>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+  
   );
 }
