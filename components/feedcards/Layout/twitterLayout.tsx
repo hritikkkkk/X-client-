@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCreateTweet } from "@/hooks/tweet";
 import { BiImageAlt } from "react-icons/bi";
 import { IoMdSend } from "react-icons/io";
+import Link from "next/link";
 
 interface TwitterSidebarButton {
   title: string;
@@ -65,7 +66,7 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
       {
         title: "Profile",
         icon: <IoPersonOutline />,
-        link: "/",
+        link: `/${user?.id}`,
       },
       {
         title: "More",
@@ -104,7 +105,7 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
         textarea.style.height = "auto";
       }
 
-      setTweetCardOpen(false); // Close tweet card after posting
+      setTweetCardOpen(false);
     } catch (error) {
       toast.error(
         "There was an error posting your tweet. Please try again later."
@@ -140,7 +141,6 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
     [queryClient]
   );
 
-  // Toggle tweet card visibility
   const toggleTweetCard = () => {
     setTweetCardOpen((prev) => !prev);
   };
@@ -160,14 +160,16 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
         <div className="mt-1 pr-3">
           <ul>
             {sidebarMenuItems.map((item) => (
-              <li
-                className="flex justify-start items-center gap-3 hover:bg-gray-800 rounded-full px-3 py-2 w-fit cursor-pointer transition-all mt-2"
-                key={item.title}
-              >
-                <span className="text-2xl">{item.icon}</span>{" "}
-                <span className=" hidden lg:inline text-md font-medium text-white">
-                  {item.title}
-                </span>
+              <li key={item.title}>
+                <Link
+                  className="flex justify-start items-center gap-3 hover:bg-gray-800 rounded-full px-3 py-2 w-fit cursor-pointer transition-all mt-2"
+                  href={item.link}
+                >
+                  <span className="text-2xl">{item.icon}</span>{" "}
+                  <span className=" hidden lg:inline text-md font-medium text-white">
+                    {item.title}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -213,7 +215,7 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
         )}
       </div>
 
-      <div className="col-span-6 lg:col-span-5 border-r border-l border-gray-700 h-full overflow-y-scroll no-scrollbar">
+      <div className="col-span-9 lg:col-span-5 border-r border-l border-gray-700 h-full overflow-y-scroll no-scrollbar">
         {props.children}
 
         {isTweetCardOpen && (
@@ -288,7 +290,7 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
           </div>
         )}
       </div>
-      <div className="col-span-3 lg:col-span-3">third grid</div>
+      <div className="hidden lg:block lg:col-span-3">Third grid</div>
     </div>
   );
 };

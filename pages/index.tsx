@@ -1,14 +1,19 @@
 import React from "react";
-
 import FeedCard from "@/components/feedcards";
-
 import { useGetAllTweets } from "@/hooks/tweet";
 import { Tweet } from "@/gql/graphql";
 import { FaXTwitter } from "react-icons/fa6";
 import Twitterlayout from "@/components/feedcards/Layout/twitterLayout";
+import { GetServerSideProps } from "next";
+import { graphqlClient } from "@/client/api";
+import { getAllTweetsQuery } from "@/graphql/query/tweet";
 
-export default function Home() {
-  const { tweets = [] } = useGetAllTweets();
+interface HomeProps {
+  tweets?: Tweet[];
+}
+
+export default function Home(props: HomeProps) {
+  const { tweets = props.tweets as Tweet[] } = useGetAllTweets();
 
   return (
     <Twitterlayout>
@@ -17,8 +22,9 @@ export default function Home() {
           <div className="sticky top-0 flex items-center justify-center h-10 bg-slate-900 text-white z-10 shadow-md ">
             <div className="flex items-center gap-3 p-4">
               <FaXTwitter className="text-3xl text-[#1d9bf0]" />
-
-              <span className=" hidden md:inline text-xl font-medium">See What’s Happening</span>
+              <span className=" hidden md:inline text-xl font-medium">
+                See What’s Happening
+              </span>
             </div>
           </div>
 
@@ -30,3 +36,14 @@ export default function Home() {
     </Twitterlayout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async (
+  context
+) => {
+  const allTweets = await graphqlClient.request(getAllTweetsQuery);
+  return {
+    props: {
+      tweets: allTweets.getAllTweets as Tweet[],
+    },
+  };
+};
