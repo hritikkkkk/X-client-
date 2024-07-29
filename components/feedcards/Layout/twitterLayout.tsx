@@ -1,5 +1,11 @@
 import { useCurrentUser } from "@/hooks/user";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { CiCircleMore } from "react-icons/ci";
 import { FaHashtag } from "react-icons/fa6";
@@ -16,6 +22,7 @@ import { useCreateTweet } from "@/hooks/tweet";
 import { BiImageAlt } from "react-icons/bi";
 import { IoMdSend } from "react-icons/io";
 import Link from "next/link";
+import ConfirmDialog from "../dialog";
 
 interface TwitterSidebarButton {
   title: string;
@@ -34,7 +41,8 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
   const tweetCardRef = useRef<HTMLDivElement>(null);
 
   const [content, setContent] = useState("");
-  const [isTweetCardOpen, setTweetCardOpen] = useState(false); // State to manage tweet card visibility
+  const [isTweetCardOpen, setTweetCardOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const sidebarMenuItems: TwitterSidebarButton[] = useMemo(
     () => [
@@ -153,6 +161,25 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
       setTweetCardOpen(false);
     }
   }, []);
+
+  useEffect(() => {
+    const logoutFlag = localStorage.getItem("logout_flag");
+
+    if (logoutFlag) {
+      toast.success("You have successfully logged out. See you soon!");
+      localStorage.removeItem("logout_flag");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("twitter_token");
+    localStorage.setItem("logout_flag", "true");
+    window.location.reload();
+  };
+
+  const openConfirmDialog = () => {
+    setIsDialogOpen(true);
+  };
 
   return (
     <div className="grid grid-cols-10 lg:h-screen w-screen md:px-16 lg:gap-4">
@@ -290,7 +317,44 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
           </div>
         )}
       </div>
-      <div className="hidden lg:block lg:col-span-3">Third grid</div>
+      <div className="hidden lg:block lg:col-span-3">
+        {user ? (
+          <div className=" flex flex-col justify-end h-full  ">
+            <button
+              onClick={openConfirmDialog}
+              className="w-full m-5 bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-white py-2 "
+            >
+              Logout
+            </button>
+
+            <ConfirmDialog
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              onConfirm={() => {
+                handleLogout();
+                setIsDialogOpen(false);
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            ref={tweetCardRef}
+            className="bg-slate-900 border border-gray-700 rounded-xl mt-2 p-6 max-w-md mx-auto"
+          >
+            <h1 className="text-2xl font-bold text-white mb-4">New to X?</h1>
+            <p className="text-sm mb-6 text-gray-400">
+              Sign in now to get your own personalized timeline!
+            </p>
+            <div className="mb-6">
+              <GoogleLogin onSuccess={handleLoginWithGoogle} />
+            </div>
+            <p className="text-xs text-gray-500">
+              By signing up, you agree to the Terms of Service and Privacy
+              Policy, including Cookie use.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
