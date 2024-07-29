@@ -27,7 +27,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-300 rounded-lg hover:bg-gray-400"
+            className="px-4 py-2 bg-green-300 rounded-lg hover:bg-green-400"
           >
             Cancel
           </button>
