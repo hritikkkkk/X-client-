@@ -319,22 +319,52 @@ const Twitterlayout: React.FC<TwitterlayoutProps> = (props) => {
       </div>
       <div className="hidden lg:block lg:col-span-3">
         {user ? (
-          <div className=" flex flex-col justify-end h-full  ">
-            <button
-              onClick={openConfirmDialog}
-              className="w-full m-5 bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-white py-2 "
-            >
-              Logout
-            </button>
+          <div className="flex flex-col h-full">
+            <div className="px-4 py-3 border mt-4 border-gray-700 rounded-lg">
+              <h1 className="text-xl mb-5 font-extrabold">Who to follow</h1>
+              {user?.recommendedUsers?.map((el) => (
+                <div className="flex items-center gap-3 " key={el?.id}>
+                  {el?.profileImageURL && (
+                    <img
+                      src={el?.profileImageURL}
+                      alt={`${el?.firstName} ${el?.lastName} profile picture`}
+                      className="rounded-full"
+                      width={45}
+                      height={45}
+                    />
+                  )}
+                  <div className="flex justify-center items-center space-x-28 ">
+                    <div className=" text-lg font-medium">
+                      {el?.firstName} {el?.lastName}
+                    </div>
+                    <Link
+                      href={`/${el?.id}`}
+                      className="bg-white text-black text-sm px-4 py-1 rounded-2xl font-bold"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-            <ConfirmDialog
-              isOpen={isDialogOpen}
-              onClose={() => setIsDialogOpen(false)}
-              onConfirm={() => {
-                handleLogout();
-                setIsDialogOpen(false);
-              }}
-            />
+            <div className="flex flex-col justify-end flex-grow p-4">
+              <button
+                onClick={openConfirmDialog}
+                className="w-full bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-white py-2"
+              >
+                Logout
+              </button>
+
+              <ConfirmDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                onConfirm={() => {
+                  handleLogout();
+                  setIsDialogOpen(false);
+                }}
+              />
+            </div>
           </div>
         ) : (
           <div
